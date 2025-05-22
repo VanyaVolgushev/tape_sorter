@@ -19,11 +19,12 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # For MSVC
 FetchContent_MakeAvailable(googletest)
 
-# --- Source Files ---
+# --- Source Files Except Main ---
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
   ${CMAKE_SOURCE_DIR}/src/*.cpp
   ${CMAKE_SOURCE_DIR}/src/*.h
 )
+list(FILTER SOURCES EXCLUDE REGEX ".*main\\.cpp$") # Exclude main.cpp
 
 # Make the library so both app and tests can reuse logic
 add_library(tape_core ${SOURCES})
