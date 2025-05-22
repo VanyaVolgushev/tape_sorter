@@ -19,7 +19,7 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # For MSVC
 FetchContent_MakeAvailable(googletest)
 
-# --- Source Files Except Main ---
+# --- Source Files Except Main --- (otherwise gtest main will conflict)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
   ${CMAKE_SOURCE_DIR}/src/*.cpp
   ${CMAKE_SOURCE_DIR}/src/*.h
