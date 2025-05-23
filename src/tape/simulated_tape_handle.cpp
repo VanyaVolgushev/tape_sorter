@@ -146,9 +146,11 @@ std::unique_ptr<ITape> SimulatedTapeFactory::CreateTemp(size_t max_size) const {
 
 std::unique_ptr<SimulatedTape> SimulatedTapeFactory::CreateNew(std::string prefix,
                                                                    size_t max_size) const {
-    static std::atomic<uint64_t> counter{0};
-    auto id = counter++;
-    auto name = prefix + "_" + std::to_string(id) + ".txt";
+    size_t counter = 0;
+    while (fs::exists(prefix + "_" + std::to_string(counter) + ".txt")) {
+        ++counter;
+    }
+    auto name = prefix + "_" + std::to_string(counter) + ".txt";
     std::ofstream(name).close();  // Create an empty file
     return std::make_unique<SimulatedTape>(name, max_size);
 }

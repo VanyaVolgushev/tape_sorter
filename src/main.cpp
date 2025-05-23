@@ -9,7 +9,7 @@ static size_t const MAX_BUFFER_SIZE = MEM_LIMIT_BYTES / sizeof(int32_t);
 
 int main(int argc, char** argv) {
     if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <unsorted tape name>" << " <output tape name>\n";
+        std::cerr << "Usage: " << argv[0] << " <unsorted tape name>" << " <output tape prefix>\n";
         return 1;
     }
     std::string in_file_name = argv[1];
