@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
                                      std::istreambuf_iterator<char>(), '\n');
     in_file.close();
 
-    SimulatedTapeHandle in_tape = SimulatedTapeHandle(in_file_name, in_file_lines);
-    SimulatedTapeHandleFactory sim_tape_factory;
+    SimulatedTape in_tape = SimulatedTape(in_file_name, in_file_lines);
+    SimulatedTapeFactory sim_tape_factory;
     auto out_tape_ptr = sim_tape_factory.CreateNew(out_file_prefix, MEM_LIMIT_BYTES);
 
     KWayTapeSorter sorter(in_tape, *out_tape_ptr, sim_tape_factory, MAX_BUFFER_SIZE);

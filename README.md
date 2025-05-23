@@ -1,0 +1,1 @@
+This C++ application simulates k-way sorting using storage devices with read/write delays that are called Tapes. A Tape has a caret that can read and write into the cell it is currently hovering over, and it can also move along the cells up and down. In this project the only device that implements the tape interface is SimulatedTape, an object

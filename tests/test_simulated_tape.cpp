@@ -5,7 +5,7 @@
 #include "tape/simulated_tape_handle.h"
 
 TEST(TapeTest, ReadWriteSingleElement) {
-    auto tape_factory = SimulatedTapeHandleFactory();
+    auto tape_factory = SimulatedTapeFactory();
     auto tape = tape_factory.CreateTemp(3);
     tape->Write(42);
     tape->Rewind();
@@ -14,7 +14,7 @@ TEST(TapeTest, ReadWriteSingleElement) {
 
 TEST(TapeTest, ReadWriteInSuccession) {
     size_t tape_size = 100;
-    auto tape_factory = SimulatedTapeHandleFactory();
+    auto tape_factory = SimulatedTapeFactory();
     auto tape = tape_factory.CreateTemp(tape_size);
     for (int32_t i = 0; i < tape_size; ++i) {
         tape->Write(i);
@@ -31,7 +31,7 @@ TEST(TapeTest, ReadWriteInSuccession) {
 
 TEST(TapeTest, ReadWriteNegative) {
     size_t tape_size = 100;
-    auto tape_factory = SimulatedTapeHandleFactory();
+    auto tape_factory = SimulatedTapeFactory();
     auto tape = tape_factory.CreateTemp(tape_size);
     for (int32_t i = 0; i < tape_size; ++i) {
         tape->Write(-i);
@@ -47,7 +47,7 @@ TEST(TapeTest, ReadWriteNegative) {
 }
 TEST(TapeTest, RightBoundaryTest) {
     size_t tape_size = 100;
-    auto tape_factory = SimulatedTapeHandleFactory();
+    auto tape_factory = SimulatedTapeFactory();
     auto tape = tape_factory.CreateTemp(tape_size);
     for (int32_t i = 0; i < tape_size; ++i) {
         tape->Write(i);
@@ -58,7 +58,7 @@ TEST(TapeTest, RightBoundaryTest) {
 
 TEST(TapeTest, LeftBoundaryTest) {
     size_t tape_size = 100;
-    auto tape_factory = SimulatedTapeHandleFactory();
+    auto tape_factory = SimulatedTapeFactory();
     auto tape = tape_factory.CreateTemp(tape_size);
     for (int32_t i = 0; i < tape_size; ++i) {
         tape->Write(i);

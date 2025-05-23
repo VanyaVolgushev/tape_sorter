@@ -10,7 +10,7 @@
 
 namespace fs = std::filesystem;
 
-SimulatedTapeHandle::SimulatedTapeHandle(std::string const& filename, size_t max_size,
+SimulatedTape::SimulatedTape(std::string const& filename, size_t max_size,
                                          bool temporary)
     : filename_(filename),
       temporary_(temporary),
@@ -26,12 +26,12 @@ SimulatedTapeHandle::SimulatedTapeHandle(std::string const& filename, size_t max
     }
 }
 
-SimulatedTapeHandle::~SimulatedTapeHandle() {
+SimulatedTape::~SimulatedTape() {
     stream_.close();
     if (temporary_) fs::remove(filename_);
 }
 
-int32_t SimulatedTapeHandle::Read() {
+int32_t SimulatedTape::Read() {
     stream_.clear();
     stream_.seekg(0, std::ios::beg);
     for (size_t i = 0; i < caret_position_; ++i) {
@@ -44,7 +44,7 @@ int32_t SimulatedTapeHandle::Read() {
     return value;
 }
 
-void SimulatedTapeHandle::Write(int32_t value) {
+void SimulatedTape::Write(int32_t value) {
     stream_.clear();
     stream_.seekg(0, std::ios::beg);
     std::ostringstream buffer;
@@ -81,7 +81,7 @@ void SimulatedTapeHandle::Write(int32_t value) {
     std::this_thread::sleep_for(config_.write_delay);
 }
 
-bool SimulatedTapeHandle::ShiftForward() {
+bool SimulatedTape::ShiftForward() {
     if (caret_position_ + 1 >= max_size_) {
         return false;
     }
@@ -90,7 +90,7 @@ bool SimulatedTapeHandle::ShiftForward() {
     return true;
 }
 
-bool SimulatedTapeHandle::ShiftBackward() {
+bool SimulatedTape::ShiftBackward() {
     if (caret_position_ == 0) {
         return false;
     }
@@ -99,12 +99,12 @@ bool SimulatedTapeHandle::ShiftBackward() {
     return true;
 }
 
-void SimulatedTapeHandle::Rewind() {
+void SimulatedTape::Rewind() {
     caret_position_ = 0;
     std::this_thread::sleep_for(config_.rewind_delay);
 }
 
-SimulatedTapeHandle::SimulatedTapeHandle(SimulatedTapeHandle&& other) noexcept
+SimulatedTape::SimulatedTape(SimulatedTape&& other) noexcept
     : filename_(std::move(other.filename_)),
       stream_(std::move(other.stream_)),
       temporary_(other.temporary_),
@@ -115,7 +115,7 @@ SimulatedTapeHandle::SimulatedTapeHandle(SimulatedTapeHandle&& other) noexcept
     other.temporary_ = false;
 }
 
-SimulatedTapeHandle& SimulatedTapeHandle::operator=(SimulatedTapeHandle&& other) noexcept {
+SimulatedTape& SimulatedTape::operator=(SimulatedTape&& other) noexcept {
     if (this != &other) {
         // Close the current stream if open
         if (stream_.is_open()) {
@@ -135,20 +135,20 @@ SimulatedTapeHandle& SimulatedTapeHandle::operator=(SimulatedTapeHandle&& other)
     return *this;
 }
 
-std::unique_ptr<ITapeHandle> SimulatedTapeHandleFactory::CreateTemp(size_t max_size) const {
+std::unique_ptr<ITape> SimulatedTapeFactory::CreateTemp(size_t max_size) const {
     fs::create_directories("tmp");
     auto name = "tmp/tape_" +
                 std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
                 ".txt";
     std::ofstream(name).close();  // Create an empty file
-    return std::make_unique<SimulatedTapeHandle>(name, max_size, true);
+    return std::make_unique<SimulatedTape>(name, max_size, true);
 }
 
-std::unique_ptr<SimulatedTapeHandle> SimulatedTapeHandleFactory::CreateNew(std::string prefix,
+std::unique_ptr<SimulatedTape> SimulatedTapeFactory::CreateNew(std::string prefix,
                                                                    size_t max_size) const {
     static std::atomic<uint64_t> counter{0};
     auto id = counter++;
     auto name = prefix + "_" + std::to_string(id) + ".txt";
     std::ofstream(name).close();  // Create an empty file
-    return std::make_unique<SimulatedTapeHandle>(name, max_size);
+    return std::make_unique<SimulatedTape>(name, max_size);
 }

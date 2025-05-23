@@ -39,8 +39,8 @@ void KWayTapeSorter::Sort() {
         SortAndStoreBuffer();
     }
     SortAndStoreBuffer();
-    std::priority_queue<std::pair<int32_t, ITapeHandle*>,
-                        std::vector<std::pair<int32_t, ITapeHandle*>>, TapeValueCompare>
+    std::priority_queue<std::pair<int32_t, ITape*>,
+                        std::vector<std::pair<int32_t, ITape*>>, TapeValueCompare>
             candidate_min_heap;
     for (auto& tape : temp_tapes_) {
         tape->Rewind();

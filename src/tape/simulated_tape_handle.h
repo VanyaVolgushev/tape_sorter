@@ -4,7 +4,7 @@
 #include "itape_handle.h"
 #include "delay_config.h"
 
-class SimulatedTapeHandle : public ITapeHandle {
+class SimulatedTape : public ITape {
 private:
     std::string filename_;
     std::fstream stream_;
@@ -14,7 +14,7 @@ private:
     DelayConfig config_;
 
     public:
-    SimulatedTapeHandle(std::string const& filename, size_t max_size, bool temporary = false);
+    SimulatedTape(std::string const& filename, size_t max_size, bool temporary = false);
     
     int32_t Read() override;
 
@@ -34,15 +34,15 @@ private:
         return filename_;
     }
 
-    SimulatedTapeHandle(SimulatedTapeHandle&&) noexcept;
-    SimulatedTapeHandle& operator=(SimulatedTapeHandle&&) noexcept;
-    ~SimulatedTapeHandle();
+    SimulatedTape(SimulatedTape&&) noexcept;
+    SimulatedTape& operator=(SimulatedTape&&) noexcept;
+    ~SimulatedTape();
 };
 
-class SimulatedTapeHandleFactory : public ITapeHandleFactory {
+class SimulatedTapeFactory : public ITapeFactory {
 public:
-    std::unique_ptr<ITapeHandle> CreateTemp(size_t max_size) const override;
+    std::unique_ptr<ITape> CreateTemp(size_t max_size) const override;
 
     // Creates a new empty file in current directory
-    std::unique_ptr<SimulatedTapeHandle> CreateNew(std::string prefix, size_t max_size) const;
+    std::unique_ptr<SimulatedTape> CreateNew(std::string prefix, size_t max_size) const;
 };

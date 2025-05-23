@@ -8,26 +8,26 @@
 class KWayTapeSorter {
 private:
     struct TapeValueCompare {
-        bool operator()(std::pair<int32_t, ITapeHandle*> const& a,
-                        std::pair<int32_t, ITapeHandle*> const& b) {
+        bool operator()(std::pair<int32_t, ITape*> const& a,
+                        std::pair<int32_t, ITape*> const& b) {
             return a.first > b.first;
         }
     };
 
-    ITapeHandle& unsorted_tape_;
-    ITapeHandle& out_tape_;
+    ITape& unsorted_tape_;
+    ITape& out_tape_;
     std::vector<int32_t> buffer_;
-    ITapeHandleFactory& buffer_tape_factory_;
+    ITapeFactory& buffer_tape_factory_;
     size_t max_buffer_size_;
 
-    std::vector<std::unique_ptr<ITapeHandle>> temp_tapes_;
+    std::vector<std::unique_ptr<ITape>> temp_tapes_;
 
     bool FillBufferFromTape();
     void SortAndStoreBuffer();
 
 public:
-    KWayTapeSorter(ITapeHandle& unsorted_tape, ITapeHandle& out_tape,
-                   ITapeHandleFactory& buffer_tape_factory, size_t max_buffer_size)
+    KWayTapeSorter(ITape& unsorted_tape, ITape& out_tape,
+                   ITapeFactory& buffer_tape_factory, size_t max_buffer_size)
         : unsorted_tape_(unsorted_tape),
           out_tape_(out_tape),
           buffer_tape_factory_(buffer_tape_factory),
