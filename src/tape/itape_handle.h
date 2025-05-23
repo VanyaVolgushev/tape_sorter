@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <memory>
 
 class ITapeHandle {
 public:
@@ -8,5 +9,18 @@ public:
     virtual bool ShiftForward() = 0;        // Move the tape forward a sector
     virtual bool ShiftBackward() = 0;       // Move the tape backward a sector
     virtual void Rewind() = 0;              // Rewind the tape to the beginning
-    virtual ~ITapeHandle() = default;             // Virtual destructor
+    virtual bool EndOfTape() const = 0;     // Check if the tape has reached the end
+    virtual ~ITapeHandle() = default;
+
+    ITapeHandle() = default;
+    ITapeHandle(ITapeHandle const&) = delete;             // Deleted copy constructor
+    ITapeHandle& operator=(ITapeHandle const&) = delete;  // Deleted copy assignment operator
+};
+
+// Might be overkill for this project, but in theory there could be all kinds of tape handles
+// (network, etc.)
+class ITapeHandleFactory {
+public:
+    virtual std::unique_ptr<ITapeHandle> CreateTemp(size_t max_size) const = 0;
+    virtual ~ITapeHandleFactory() = default;
 };

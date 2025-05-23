@@ -10,8 +10,12 @@
 
 namespace fs = std::filesystem;
 
-SimulatedTapeHandle::SimulatedTapeHandle(std::string const& filename, std::string const& config_path, size_t max_size)
-    : filename_(filename), max_size_(max_size), config_(config_path) {
+SimulatedTapeHandle::SimulatedTapeHandle(std::string const& filename, size_t max_size,
+                                         bool temporary)
+    : filename_(filename),
+      temporary_(temporary),
+      max_size_(max_size),
+      config_(DelayConfig::GetConfigPath()) {
     if (max_size_ == 0) {
         throw std::invalid_argument("Max size must be greater than 0");
     }
@@ -111,30 +115,6 @@ SimulatedTapeHandle::SimulatedTapeHandle(SimulatedTapeHandle&& other) noexcept
     other.temporary_ = false;
 }
 
-SimulatedTapeHandle SimulatedTapeHandle::CreateWithFile(std::string filename, std::string config_path, size_t max_size) {
-    return SimulatedTapeHandle(std::move(filename), std::move(config_path), max_size);
-}
-
-SimulatedTapeHandle SimulatedTapeHandle::CreateTemp(std::string config_path, size_t max_size) {
-    fs::create_directories("tmp");
-    auto name = "tmp/tape_" +
-                std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
-                ".txt";
-    std::ofstream(name).close(); // Create an empty file
-    SimulatedTapeHandle tape = SimulatedTapeHandle(name, config_path, max_size);
-    tape.temporary_ = true;
-    return tape;
-}
-
-SimulatedTapeHandle SimulatedTapeHandle::Create(std::string prefix, std::string config_path, size_t max_size) {
-    static std::atomic<uint64_t> counter{0};
-    auto id = counter++;
-    auto name = prefix + "_" + std::to_string(id) + ".txt";
-    std::ofstream(name).close(); // Create an empty file
-    auto tape = SimulatedTapeHandle(name, config_path, max_size);
-    return tape;
-}
-
 SimulatedTapeHandle& SimulatedTapeHandle::operator=(SimulatedTapeHandle&& other) noexcept {
     if (this != &other) {
         // Close the current stream if open
@@ -148,9 +128,27 @@ SimulatedTapeHandle& SimulatedTapeHandle::operator=(SimulatedTapeHandle&& other)
         temporary_ = other.temporary_;
         max_size_ = other.max_size_;
         caret_position_ = other.caret_position_;
+        config_ = std::move(other.config_);
 
-        // Reset the moved-from object
         other.temporary_ = false;
     }
     return *this;
+}
+
+std::unique_ptr<ITapeHandle> SimulatedTapeHandleFactory::CreateTemp(size_t max_size) const {
+    fs::create_directories("tmp");
+    auto name = "tmp/tape_" +
+                std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
+                ".txt";
+    std::ofstream(name).close();  // Create an empty file
+    return std::make_unique<SimulatedTapeHandle>(name, max_size, true);
+}
+
+std::unique_ptr<SimulatedTapeHandle> SimulatedTapeHandleFactory::CreateNew(std::string prefix,
+                                                                   size_t max_size) const {
+    static std::atomic<uint64_t> counter{0};
+    auto id = counter++;
+    auto name = prefix + "_" + std::to_string(id) + ".txt";
+    std::ofstream(name).close();  // Create an empty file
+    return std::make_unique<SimulatedTapeHandle>(name, max_size);
 }

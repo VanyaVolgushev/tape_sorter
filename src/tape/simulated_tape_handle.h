@@ -13,9 +13,9 @@ private:
     size_t caret_position_ = 0;
     DelayConfig config_;
 
-    SimulatedTapeHandle(std::string const& filename, std::string const& config_path, size_t max_size);
-
-public:
+    public:
+    SimulatedTapeHandle(std::string const& filename, size_t max_size, bool temporary = false);
+    
     int32_t Read() override;
 
     void Write(int32_t value) override;
@@ -26,20 +26,23 @@ public:
 
     void Rewind() override;
 
+    bool EndOfTape() const override {
+        return caret_position_ >= max_size_;
+    }
+
+    std::string GetFilename() const {
+        return filename_;
+    }
+
     SimulatedTapeHandle(SimulatedTapeHandle&&) noexcept;
     SimulatedTapeHandle& operator=(SimulatedTapeHandle&&) noexcept;
+    ~SimulatedTapeHandle();
+};
 
-    // Creates a tape that reads and writes to an existing file
-    static SimulatedTapeHandle CreateWithFile(std::string filename, std::string config_path, size_t max_size);
-
-    // For buffer tapes, creates an empty file in ./tmp directory
-    static SimulatedTapeHandle CreateTemp(std::string config_path, size_t max_size);
+class SimulatedTapeHandleFactory : public ITapeHandleFactory {
+public:
+    std::unique_ptr<ITapeHandle> CreateTemp(size_t max_size) const override;
 
     // Creates a new empty file in current directory
-    static SimulatedTapeHandle Create(std::string prefix, std::string config_path, size_t max_size);
-
-    SimulatedTapeHandle(SimulatedTapeHandle const&) = delete;             // Deleted copy constructor
-    SimulatedTapeHandle& operator=(SimulatedTapeHandle const&) = delete;  // Deleted copy assignment operator
-
-    ~SimulatedTapeHandle();
+    std::unique_ptr<SimulatedTapeHandle> CreateNew(std::string prefix, size_t max_size) const;
 };
