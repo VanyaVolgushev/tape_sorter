@@ -1,5 +1,6 @@
-#include "simulated_tape.h"
+#include "simulated_tape_handle.h"
 
+#include <atomic>
 #include <chrono>
 #include <exception>
 #include <filesystem>
@@ -9,7 +10,7 @@
 
 namespace fs = std::filesystem;
 
-SimulatedTape::SimulatedTape(std::string const& filename, std::string const& config_path, size_t max_size)
+SimulatedTapeHandle::SimulatedTapeHandle(std::string const& filename, std::string const& config_path, size_t max_size)
     : filename_(filename), max_size_(max_size), config_(config_path) {
     if (max_size_ == 0) {
         throw std::invalid_argument("Max size must be greater than 0");
@@ -21,12 +22,12 @@ SimulatedTape::SimulatedTape(std::string const& filename, std::string const& con
     }
 }
 
-SimulatedTape::~SimulatedTape() {
+SimulatedTapeHandle::~SimulatedTapeHandle() {
     stream_.close();
     if (temporary_) fs::remove(filename_);
 }
 
-int32_t SimulatedTape::Read() {
+int32_t SimulatedTapeHandle::Read() {
     stream_.clear();
     stream_.seekg(0, std::ios::beg);
     for (size_t i = 0; i < caret_position_; ++i) {
@@ -39,7 +40,7 @@ int32_t SimulatedTape::Read() {
     return value;
 }
 
-void SimulatedTape::Write(int32_t value) {
+void SimulatedTapeHandle::Write(int32_t value) {
     stream_.clear();
     stream_.seekg(0, std::ios::beg);
     std::ostringstream buffer;
@@ -76,7 +77,7 @@ void SimulatedTape::Write(int32_t value) {
     std::this_thread::sleep_for(config_.write_delay);
 }
 
-bool SimulatedTape::ShiftForward() {
+bool SimulatedTapeHandle::ShiftForward() {
     if (caret_position_ + 1 >= max_size_) {
         return false;
     }
@@ -85,7 +86,7 @@ bool SimulatedTape::ShiftForward() {
     return true;
 }
 
-bool SimulatedTape::ShiftBackward() {
+bool SimulatedTapeHandle::ShiftBackward() {
     if (caret_position_ == 0) {
         return false;
     }
@@ -94,12 +95,12 @@ bool SimulatedTape::ShiftBackward() {
     return true;
 }
 
-void SimulatedTape::Rewind() {
+void SimulatedTapeHandle::Rewind() {
     caret_position_ = 0;
     std::this_thread::sleep_for(config_.rewind_delay);
 }
 
-SimulatedTape::SimulatedTape(SimulatedTape&& other) noexcept
+SimulatedTapeHandle::SimulatedTapeHandle(SimulatedTapeHandle&& other) noexcept
     : filename_(std::move(other.filename_)),
       stream_(std::move(other.stream_)),
       temporary_(other.temporary_),
@@ -110,31 +111,31 @@ SimulatedTape::SimulatedTape(SimulatedTape&& other) noexcept
     other.temporary_ = false;
 }
 
-SimulatedTape SimulatedTape::CreateWithFile(std::string filename, std::string config_path, size_t max_size) {
-    return SimulatedTape(std::move(filename), std::move(config_path), max_size);
+SimulatedTapeHandle SimulatedTapeHandle::CreateWithFile(std::string filename, std::string config_path, size_t max_size) {
+    return SimulatedTapeHandle(std::move(filename), std::move(config_path), max_size);
 }
 
-SimulatedTape SimulatedTape::CreateTemp(std::string config_path, size_t max_size) {
+SimulatedTapeHandle SimulatedTapeHandle::CreateTemp(std::string config_path, size_t max_size) {
     fs::create_directories("tmp");
     auto name = "tmp/tape_" +
                 std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
                 ".txt";
     std::ofstream(name).close(); // Create an empty file
-    SimulatedTape tape = SimulatedTape(name, config_path, max_size);
+    SimulatedTapeHandle tape = SimulatedTapeHandle(name, config_path, max_size);
     tape.temporary_ = true;
     return tape;
 }
 
-SimulatedTape SimulatedTape::Create(std::string prefix, std::string config_path, size_t max_size) {
+SimulatedTapeHandle SimulatedTapeHandle::Create(std::string prefix, std::string config_path, size_t max_size) {
     static std::atomic<uint64_t> counter{0};
     auto id = counter++;
     auto name = prefix + "_" + std::to_string(id) + ".txt";
     std::ofstream(name).close(); // Create an empty file
-    auto tape = SimulatedTape(name, config_path, max_size);
+    auto tape = SimulatedTapeHandle(name, config_path, max_size);
     return tape;
 }
 
-SimulatedTape& SimulatedTape::operator=(SimulatedTape&& other) noexcept {
+SimulatedTapeHandle& SimulatedTapeHandle::operator=(SimulatedTapeHandle&& other) noexcept {
     if (this != &other) {
         // Close the current stream if open
         if (stream_.is_open()) {
