@@ -9,7 +9,8 @@ public:
     virtual bool ShiftForward() = 0;        // Move the tape forward a sector
     virtual bool ShiftBackward() = 0;       // Move the tape backward a sector
     virtual void Rewind() = 0;              // Rewind the tape to the beginning
-    virtual bool EndOfTape() const = 0;     // Check if the tape has reached the end
+    virtual bool PointingAtLast() const = 0;// Check if the tape has reached the end
+    virtual size_t GetMaxSize() const = 0;
     virtual ~ITape() = default;
 
     ITape() = default;

@@ -18,7 +18,7 @@ The application simulates tape storage devices with these characteristics:
 - Memory operations limited by `MAX_BUFFER_SIZE`
 - Uses temporary tapes for intermediate sorting steps
 
-## Build Instructions
+## Build App and Tests
 
 ```bash
 mkdir ./build

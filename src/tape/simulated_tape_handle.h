@@ -26,8 +26,12 @@ private:
 
     void Rewind() override;
 
-    bool EndOfTape() const override {
-        return caret_position_ >= max_size_;
+    bool PointingAtLast() const override {
+        return caret_position_ + 1 >= max_size_;
+    }
+    
+    virtual size_t GetMaxSize() const override {
+        return max_size_;
     }
 
     std::string GetFilename() const {

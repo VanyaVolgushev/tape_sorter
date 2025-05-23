@@ -6,7 +6,7 @@
 // Clears buffer and fills it with new data from the unsorted tape
 // Returns false if reached end of tape
 bool KWayTapeSorter::FillBufferFromTape() {
-    if (unsorted_tape_.EndOfTape()) {
+    if(unsorted_tape_.GetMaxSize() == 0) {
         return false;
     }
     buffer_.clear();
@@ -22,12 +22,12 @@ bool KWayTapeSorter::FillBufferFromTape() {
 }
 
 void KWayTapeSorter::SortAndStoreBuffer() {
+    if(buffer_.empty()) {
+        return;
+    }
     std::sort(buffer_.begin(), buffer_.end());
     auto temp_tape = buffer_tape_factory_.CreateTemp(buffer_.size());
     for (auto const& value : buffer_) {
-        if (temp_tape->EndOfTape()) {
-            throw std::runtime_error("Buffer tape was too small for buffer");
-        }
         temp_tape->Write(value);
         temp_tape->ShiftForward();
     }
@@ -53,6 +53,9 @@ void KWayTapeSorter::Sort() {
         out_tape_.ShiftForward();
         if (min_pair.second->ShiftForward()) {
             candidate_min_heap.push({min_pair.second->Read(), min_pair.second});
+        } else {
+            
         }
     }
+    
 }

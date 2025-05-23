@@ -10,15 +10,11 @@
 
 namespace fs = std::filesystem;
 
-SimulatedTape::SimulatedTape(std::string const& filename, size_t max_size,
-                                         bool temporary)
+SimulatedTape::SimulatedTape(std::string const& filename, size_t max_size, bool temporary)
     : filename_(filename),
       temporary_(temporary),
       max_size_(max_size),
       config_(DelayConfig::GetConfigPath()) {
-    if (max_size_ == 0) {
-        throw std::invalid_argument("Max size must be greater than 0");
-    }
     stream_.open(filename, std::ios::in | std::ios::out);
     if (!stream_.is_open()) {
         // File didn’t exist
@@ -32,6 +28,9 @@ SimulatedTape::~SimulatedTape() {
 }
 
 int32_t SimulatedTape::Read() {
+    if (caret_position_ >= max_size_ || caret_position_ < 0) {
+        throw std::out_of_range("Trying to read out of bounds");
+    }
     stream_.clear();
     stream_.seekg(0, std::ios::beg);
     for (size_t i = 0; i < caret_position_; ++i) {
@@ -145,7 +144,7 @@ std::unique_ptr<ITape> SimulatedTapeFactory::CreateTemp(size_t max_size) const {
 }
 
 std::unique_ptr<SimulatedTape> SimulatedTapeFactory::CreateNew(std::string prefix,
-                                                                   size_t max_size) const {
+                                                               size_t max_size) const {
     size_t counter = 0;
     while (fs::exists(prefix + "_" + std::to_string(counter) + ".txt")) {
         ++counter;
