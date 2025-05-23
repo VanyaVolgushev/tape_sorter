@@ -119,7 +119,7 @@ SimulatedTape SimulatedTape::CreateTemp(std::string config_path, size_t max_size
     auto name = "tmp/tape_" +
                 std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
                 ".txt";
-    std::ofstream(name).close();
+    std::ofstream(name).close(); // Create an empty file
     SimulatedTape tape = SimulatedTape(name, config_path, max_size);
     tape.temporary_ = true;
     return tape;
@@ -129,8 +129,8 @@ SimulatedTape SimulatedTape::Create(std::string prefix, std::string config_path,
     static std::atomic<uint64_t> counter{0};
     auto id = counter++;
     auto name = prefix + "_" + std::to_string(id) + ".txt";
+    std::ofstream(name).close(); // Create an empty file
     auto tape = SimulatedTape(name, config_path, max_size);
-    tape.temporary_ = true;
     return tape;
 }
 
