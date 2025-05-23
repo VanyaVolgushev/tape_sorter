@@ -9,13 +9,8 @@
 
 namespace fs = std::filesystem;
 
-static constexpr auto delay_read_ms = std::chrono::milliseconds(5);
-static constexpr auto delay_write_ms = std::chrono::milliseconds(5);
-static constexpr auto delay_shift_ms = std::chrono::milliseconds(1);
-static constexpr auto delay_rewind_ms = std::chrono::milliseconds(100);
-
-SimulatedTape::SimulatedTape(std::string const& filename, size_t max_size)
-    : filename_(filename), max_size_(max_size) {
+SimulatedTape::SimulatedTape(std::string const& filename, std::string const& config_path, size_t max_size)
+    : filename_(filename), max_size_(max_size), config_(config_path) {
     if (max_size_ == 0) {
         throw std::invalid_argument("Max size must be greater than 0");
     }
@@ -40,7 +35,7 @@ int32_t SimulatedTape::Read() {
 
     int32_t value;
     stream_ >> value;
-    std::this_thread::sleep_for(delay_read_ms);
+    std::this_thread::sleep_for(config_.read_delay);
     return value;
 }
 
@@ -78,7 +73,7 @@ void SimulatedTape::Write(int32_t value) {
     stream_.open(filename_, std::ios::in | std::ios::out);
 
     // Simulate write delay
-    std::this_thread::sleep_for(delay_write_ms);
+    std::this_thread::sleep_for(config_.write_delay);
 }
 
 bool SimulatedTape::ShiftForward() {
@@ -86,7 +81,7 @@ bool SimulatedTape::ShiftForward() {
         return false;
     }
     ++caret_position_;
-    std::this_thread::sleep_for(delay_shift_ms);
+    std::this_thread::sleep_for(config_.shift_delay);
     return true;
 }
 
@@ -95,13 +90,13 @@ bool SimulatedTape::ShiftBackward() {
         return false;
     }
     --caret_position_;
-    std::this_thread::sleep_for(delay_shift_ms);
+    std::this_thread::sleep_for(config_.shift_delay);
     return true;
 }
 
 void SimulatedTape::Rewind() {
     caret_position_ = 0;
-    std::this_thread::sleep_for(delay_rewind_ms);
+    std::this_thread::sleep_for(config_.rewind_delay);
 }
 
 SimulatedTape::SimulatedTape(SimulatedTape&& other) noexcept
@@ -109,34 +104,32 @@ SimulatedTape::SimulatedTape(SimulatedTape&& other) noexcept
       stream_(std::move(other.stream_)),
       temporary_(other.temporary_),
       max_size_(other.max_size_),
-      caret_position_(other.caret_position_) {
+      caret_position_(other.caret_position_),
+      config_(std::move(other.config_)) {
     // Reset the moved-from object
     other.temporary_ = false;
 }
 
-SimulatedTape SimulatedTape::CreateWithFile(std::string filename, size_t max_size) {
-    return SimulatedTape(std::move(filename), max_size);
+SimulatedTape SimulatedTape::CreateWithFile(std::string filename, std::string config_path, size_t max_size) {
+    return SimulatedTape(std::move(filename), std::move(config_path), max_size);
 }
 
-SimulatedTape SimulatedTape::CreateTemp(size_t max_size) {
+SimulatedTape SimulatedTape::CreateTemp(std::string config_path, size_t max_size) {
     fs::create_directories("tmp");
     auto name = "tmp/tape_" +
                 std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
                 ".txt";
-    // Create an empty file
     std::ofstream(name).close();
-    // Open the file for reading and writing using SimulatedTape
-    SimulatedTape tape = SimulatedTape(name, max_size);
+    SimulatedTape tape = SimulatedTape(name, config_path, max_size);
     tape.temporary_ = true;
     return tape;
 }
 
-SimulatedTape SimulatedTape::Create(std::string prefix, size_t max_size) {
-    // Ensure a unique name
+SimulatedTape SimulatedTape::Create(std::string prefix, std::string config_path, size_t max_size) {
     static std::atomic<uint64_t> counter{0};
     auto id = counter++;
     auto name = prefix + "_" + std::to_string(id) + ".txt";
-    auto tape = SimulatedTape(name, max_size);
+    auto tape = SimulatedTape(name, config_path, max_size);
     tape.temporary_ = true;
     return tape;
 }

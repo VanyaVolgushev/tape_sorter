@@ -1,9 +1,13 @@
+#include <filesystem>
+
 #include <gtest/gtest.h>
 
 #include "tape/simulated_tape.h"
 
+namespace {}
+
 TEST(TapeTest, ReadWriteSingleElement) {
-    SimulatedTape tape = SimulatedTape::CreateTemp(3);
+    SimulatedTape tape = SimulatedTape::CreateTemp(DelayConfig::GetConfigPath(), 3);
     tape.Write(42);
     tape.Rewind();
     EXPECT_EQ(tape.Read(), 42);
@@ -11,7 +15,7 @@ TEST(TapeTest, ReadWriteSingleElement) {
 
 TEST(TapeTest, ReadWriteInSuccession) {
     size_t tape_size = 100;
-    SimulatedTape tape = SimulatedTape::CreateTemp(tape_size);
+    SimulatedTape tape = SimulatedTape::CreateTemp(DelayConfig::GetConfigPath(), tape_size);
     for (int32_t i = 0; i < tape_size; ++i) {
         tape.Write(i);
         tape.ShiftForward();
@@ -27,7 +31,7 @@ TEST(TapeTest, ReadWriteInSuccession) {
 
 TEST(TapeTest, RightBoundaryTest) {
     size_t tape_size = 100;
-    SimulatedTape tape = SimulatedTape::CreateTemp(tape_size);
+    SimulatedTape tape = SimulatedTape::CreateTemp(DelayConfig::GetConfigPath(), tape_size);
     for (int32_t i = 0; i < tape_size; ++i) {
         tape.Write(i);
         tape.ShiftForward();
@@ -37,7 +41,7 @@ TEST(TapeTest, RightBoundaryTest) {
 
 TEST(TapeTest, LeftBoundaryTest) {
     size_t tape_size = 100;
-    SimulatedTape tape = SimulatedTape::CreateTemp(tape_size);
+    SimulatedTape tape = SimulatedTape::CreateTemp(DelayConfig::GetConfigPath(), tape_size);
     for (int32_t i = 0; i < tape_size; ++i) {
         tape.Write(i);
         tape.ShiftForward();

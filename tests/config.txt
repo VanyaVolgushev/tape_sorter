@@ -1,0 +1,15 @@
+5
+5
+1
+100
+
+These are:
+
+X - read time in ms
+X - write time in ms
+X - shift time in ms
+X - rewind time in ms
+
+All have to be integer.
+
+Program uses this config to set how long the virtual tapes take to perform their operations.
