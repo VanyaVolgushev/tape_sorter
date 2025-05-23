@@ -1,16 +1,36 @@
-This C++ application does k-way sorting using storage devices that are called Tapes. A Tape has a caret that can read and write into the cell it is currently hovering over, and the caret can also move along the cells of the tape up and down. Each cell stores an int32_t. In this project the only class that implements the tape interface is SimulatedTape, an object that opens a .txt file and writes integers into the line the virtual caret is hovering over. Read, write and caret shift delays of SimulatedTape are defined in config.txt. The program is only allowed to store MAX_BUFFER_SIZE bytes of integers from tapes, so temporary tapes are created with corresponding .txt files to store intermediate sorting results.
+# Tape Sorter
 
-Build instructions:
+A C++ application that performs k-way sorting using virtual tape storage devices.
 
-Run the following in the root project directory:
+## Overview
 
+The application simulates tape storage devices with these characteristics:
+- Movable caret for reading and writing operations
+- Cells store `int32_t` values
+- Single cell access at a time
+- Bi-directional caret movement along the tape
+
+## Implementation Details
+
+- `SimulatedTape` class implements tape functionality
+- Tapes stored as .txt files
+- Configurable delays for read/write and caret movement in `config.txt`
+- Memory operations limited by `MAX_BUFFER_SIZE`
+- Uses temporary tapes for intermediate sorting steps
+
+## Build Instructions
+
+```bash
 mkdir ./build
 cd ./build
 cmake ..
 make
+```
 
-Launch instructions:
+## Running the Application
 
-place config.txt and example_unsorted.txt next to the binary and run:
-
-./tape_sorter example_unsorted.txt output.txt
+1. Place `config.txt` and input file in the binary's directory
+2. Execute:
+```bash
+./tape_sorter example_unsorted.txt out
+```
