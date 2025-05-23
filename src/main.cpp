@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <filesystem>
 
 #include "kway_tape_sorter.h"
 #include "tape/simulated_tape_handle.h"
@@ -7,9 +8,15 @@
 static size_t const MEM_LIMIT_BYTES = 512;  // 0.5 KB
 static size_t const MAX_BUFFER_SIZE = MEM_LIMIT_BYTES / sizeof(int32_t);
 
+namespace fs = std::filesystem;
+
 int main(int argc, char** argv) {
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <unsorted tape name>" << " <output tape prefix>\n";
+        return 1;
+    }
+    if(!fs::exists(argv[1])) {
+        std::cerr << "Error: Input file does not exist.\n";
         return 1;
     }
     std::string in_file_name = argv[1];
